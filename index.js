@@ -1,50 +1,31 @@
-  /**
-   * TODO(developer): Uncomment this variable and replace with your
-   *   Google Analytics 4 property ID before running the sample.
-   */
-  propertyId = '410718977';
+// Import the Google Cloud client library using default credentials
+const {BigQuery} = require('@google-cloud/bigquery');
+const bigquery = new BigQuery({ projectId: 'todo-list-a6ea9' });
+async function query() {
+  // Queries the U.S. given names dataset for the state of Texas.
 
-  // Imports the Google Analytics Data API client library.
-  const {BetaAnalyticsDataClient} = require('@google-analytics/data');
-  const {GoogleAuth} = require('google-auth-library');
+  const query = `SELECT 
+  *
+  FROM \`todo-list-a6ea9.analytics_395031298.events_intraday_20231019\`, unnest(user_properties) as user_properties
+  where user_properties.key = 'user_id' and user_properties.value.string_value = "a9832199a9cf00bdc7aa330e9eed71d5" LIMIT 1`;
 
-  // Using a default constructor instructs the client to use the credentials
-  // specified in GOOGLE_APPLICATION_CREDENTIALS environment variable.
-  const analyticsDataClient = new BetaAnalyticsDataClient();
+  // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
+  const options = {
+    query: query,
+    // Location must match that of the dataset(s) referenced in the query.
+    location: 'US',
+  };
 
-  const scopes = ['https://www.googleapis.com/auth/analytics.readonly'];
+  // Run the query as a job
+  const [job] = await bigquery.createQueryJob(options);
+  console.log(`Job ${job.id} started.`);
 
-  // Runs a simple report.
-  async function runReport() {
-   const auth = new GoogleAuth({scopes});
+  // Wait for the query to finish
+  const [rows] = await job.getQueryResults();
 
-   const authToken = await auth.getClient();
-   analyticsDataClient.auth = authToken;
+  // Print the results
+  console.log('Rows:');
+  rows.forEach(row => console.log(row));
+}
 
-    const [response] = await analyticsDataClient.runReport({
-      property: `properties/${propertyId}`,
-      dateRanges: [
-        {
-          startDate: '2020-03-31',
-          endDate: 'today',
-        },
-      ],
-      dimensions: [
-        {
-          name: 'signedInWithUserId',
-        },
-      ],
-      metrics: [
-        {
-          name: 'activeUsers',
-        },
-      ]
-    });
-
-    console.log('Report result:');
-    response.rows.forEach(row => {
-      console.log(row.dimensionValues[0], row.metricValues[0]);
-    });
-  }
-
-  runReport();
+query();

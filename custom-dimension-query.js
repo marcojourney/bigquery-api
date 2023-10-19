@@ -33,14 +33,17 @@
         filter: {
           fieldName: 'customUser:userId',
           stringFilter: {
-            value: '1f2a3fe72f60b00fd637028dbfa4da81'
+            value: '1'
           }
         }
       },
       dimensions: [
+        // {
+        //   name: "city"
+        // },
         {
-          name: 'region',
-        },
+          name: "region"
+        }
       ],
       metrics: [
         {

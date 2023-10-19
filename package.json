@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "@google-analytics/data": "^4.0.1",
+    "@google-cloud/bigquery": "^7.3.0",
     "google-auth-library": "^9.1.0"
   }
 }
